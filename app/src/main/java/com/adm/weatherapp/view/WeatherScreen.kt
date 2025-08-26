@@ -110,12 +110,21 @@ fun WeatherScreen(
                 }
             }
         },
-        onPermissionDenied = {
+        onPermissionDenied = { openSettings ->
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Location permission denied, weather cannot be displayed.")
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        "Location permission denied. Weather cannot be displayed.",
+                        color = Color.Red
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { openSettings() }) {
+                        Text("Open Settings")
+                    }
+                }
             }
         },
         onPermissionError = {
@@ -126,6 +135,7 @@ fun WeatherScreen(
                 Text("An error occurred, please try again.")
             }
         }
+
     )
 }
 
