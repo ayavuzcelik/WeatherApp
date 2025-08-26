@@ -3,13 +3,23 @@ package com.adm.weatherapp.view
 import android.Manifest
 import android.content.pm.PackageManager
 import android.widget.Toast
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,7 +30,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -30,6 +42,8 @@ import com.adm.weatherapp.model.GetWeatherResponse
 import com.adm.weatherapp.ui.components.PermissionRequester
 import com.adm.weatherapp.viewmodel.WeatherViewModel
 import com.google.android.gms.location.LocationServices
+import com.adm.weatherapp.R
+
 
 @Composable
 fun WeatherScreen(
@@ -142,10 +156,95 @@ fun WeatherScreen(
 
 @Composable
 fun WeatherData(weatherData: GetWeatherResponse, modifier: Modifier = Modifier) {
-    Text(
-        text = weatherData.toString(),
+    val main = weatherData.main
+    val wind = weatherData.wind
+    val clouds = weatherData.clouds
+    val weatherCondition = weatherData.weather.firstOrNull()?.main ?: "Clear"
+    val city = weatherData.name
+    val backgroundRes = when (weatherCondition) {
+        "Clear" -> R.drawable.bg_clear
+        "Clouds" -> R.drawable.bg_clouds
+        "Rain" -> R.drawable.bg_rain
+        "Snow" -> R.drawable.bg_snow
+        else -> R.drawable.bg_clear
+    }
+
+    Box(
         modifier = modifier
-    )
+            .fillMaxSize()
+    ) {
+        Image(
+            painter = painterResource(id = backgroundRes),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = city,
+                color = Color.White,
+                fontSize = 48.sp
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                text = "${main.temp.toInt()}°C",
+                color = Color.White,
+                fontSize = 48.sp
+            )
+
+            Text(
+                text = "Feels like ${main.feels_like.toInt()}°C",
+                color = Color.White.copy(alpha = 0.9f),
+                fontSize = 20.sp
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                WeatherInfoCard(icon = R.drawable.ic_wind, label = "Wind", value = "${wind.speed} m/s")
+                WeatherInfoCard(icon = R.drawable.ic_cloud, label = "Clouds", value = "${clouds.all}%")
+                WeatherInfoCard(icon = R.drawable.ic_humidity, label = "Humidity", value = "${main.humidity}%")
+                WeatherInfoCard(icon = R.drawable.ic_pressure, label = "Pressure", value = "${main.pressure} hPa")
+            }
+        }
+    }
+}
+
+@Composable
+fun WeatherInfoCard(icon: Int, label: String, value: String) {
+    Card(
+        modifier = Modifier.size(80.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.2f)),
+        shape = RoundedCornerShape(16.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = label,
+                tint = Color.White,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(value, color = Color.White, fontSize = 14.sp)
+        }
+    }
 }
 
 @Composable

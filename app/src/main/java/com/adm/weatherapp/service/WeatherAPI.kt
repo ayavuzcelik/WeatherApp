@@ -13,5 +13,6 @@ interface WeatherAPI {
         @Query("lat") lat: String,
         @Query("lon") lon: String,
         @Query("appid") key: String,
+        @Query("units") units: String = "metric"
     ): GetWeatherResponse
 }
